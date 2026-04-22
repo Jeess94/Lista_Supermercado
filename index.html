@@ -4,11 +4,19 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
   <meta name="theme-color" content="#0a1409">
+
+  <!-- PWA: iOS -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="SuperList">
+  <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMjggMTI4Ij48cmVjdCB3aWR0aD0iMTI4IiBoZWlnaHQ9IjEyOCIgcng9IjI0IiBmaWxsPSIjMGExNDA5Ii8+PHJlY3QgeD0iMjQiIHk9IjMwIiB3aWR0aD0iMTIiIGhlaWdodD0iMTIiIHJ4PSIzIiBmaWxsPSIjMmVjYzcxIi8+PHJlY3QgeD0iNDQiIHk9IjMzIiB3aWR0aD0iNjAiIGhlaWdodD0iNiIgcng9IjMiIGZpbGw9IiMyZWNjNzEiLz48cmVjdCB4PSIyNCIgeT0iNTgiIHdpZHRoPSIxMiIgaGVpZ2h0PSIxMiIgcng9IjMiIGZpbGw9IiMyZWNjNzEiLz48cmVjdCB4PSI0NCIgeT0iNjEiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2IiByeD0iMyIgZmlsbD0iIzJlY2M3MSIvPjxyZWN0IHg9IjI0IiB5PSI4NiIgd2lkdGg9IjEyIiBoZWlnaHQ9IjEyIiByeD0iMyIgZmlsbD0iIzJlY2M3MSIvPjxyZWN0IHg9IjQ0IiB5PSI4OSIgd2lkdGg9IjYwIiBoZWlnaHQ9IjYiIHJ4PSIzIiBmaWxsPSIjMmVjYzcxIi8+PC9zdmc+">
+
+  <!-- PWA: Manifest inline via JS (no extra file needed) -->
   <title>Duxia SuperList</title>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+
   <style>
     :root {
       --bg: #0a1409;
@@ -58,7 +66,10 @@
     }
     .logo span { color: var(--accent); }
     .subtitle { font-size: 13px; color: var(--text-muted); margin-top: 3px; }
-    .clear-btn {
+
+    .header-actions { display: flex; gap: 8px; align-items: center; }
+
+    .clear-btn, .download-btn, .install-btn {
       background: none;
       border: 1px solid var(--border2);
       color: #7daa82;
@@ -67,9 +78,37 @@
       font-size: 12px;
       cursor: pointer;
       font-family: 'DM Sans', sans-serif;
-      display: none;
+      white-space: nowrap;
     }
+    .clear-btn { display: none; }
     .clear-btn.visible { display: block; }
+    .install-btn { display: none; }
+    .install-btn.visible { display: block; }
+
+    /* ── INSTALL BANNER (iOS) ── */
+    .install-banner {
+      margin: 12px 16px 0;
+      background: var(--card2);
+      border: 1px solid var(--border2);
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-size: 13px;
+      color: var(--text-soft);
+      display: none;
+      line-height: 1.5;
+    }
+    .install-banner.visible { display: block; }
+    .install-banner strong { color: var(--accent); }
+    .banner-close {
+      float: right;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 18px;
+      cursor: pointer;
+      margin-left: 8px;
+      line-height: 1;
+    }
 
     /* ── SCROLL AREA ── */
     .scroll { padding: 12px 16px 140px; }
@@ -112,7 +151,6 @@
       transition: color 0.2s;
     }
     .cat-del:hover { color: #ff6b6b; }
-
     .empty-cat { padding: 10px 16px; font-size: 12px; color: #2e4430; }
 
     /* ── ITEM ── */
@@ -126,13 +164,7 @@
     }
     .item:last-child { border-bottom: none; }
     .item.checked { opacity: 0.4; }
-    .item-check {
-      background: none;
-      border: none;
-      cursor: pointer;
-      padding: 0;
-      flex-shrink: 0;
-    }
+    .item-check { background: none; border: none; cursor: pointer; padding: 0; flex-shrink: 0; }
     .check-box {
       display: flex;
       align-items: center;
@@ -170,7 +202,6 @@
     .item-del:hover { color: #ff6b6b; }
     @media (hover: none) { .item-del { opacity: 1 !important; } }
 
-    /* edit input inline */
     .item-edit-input {
       flex: 1;
       background: var(--card2);
@@ -241,7 +272,6 @@
     }
     .modal-input:focus { border-color: var(--accent); }
 
-    /* icon grid */
     .icon-grid {
       display: grid;
       grid-template-columns: repeat(6, 1fr);
@@ -259,7 +289,6 @@
     }
     .icon-btn.active { background: var(--accent); }
 
-    /* cat select chips */
     .cat-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
     .cat-chip {
       border: none;
@@ -275,7 +304,6 @@
     }
     .cat-chip.active { background: var(--accent); color: var(--accent-dark); }
 
-    /* modal buttons */
     .modal-btns { display: flex; gap: 10px; }
     .btn-cancel {
       flex: 1;
@@ -360,9 +388,7 @@
     }
     .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-    /* ── ANIMATIONS ── */
     @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-
     button { transition: transform 0.12s, opacity 0.12s; }
     button:active { transform: scale(0.93) !important; opacity: 0.8; }
   </style>
@@ -375,7 +401,18 @@
     <div class="logo">Duxia <span>SuperList</span></div>
     <div class="subtitle" id="subtitle">Cargando...</div>
   </div>
-  <button class="clear-btn" id="clearBtn" onclick="clearChecked()">🧹 Limpiar</button>
+  <div class="header-actions">
+    <button class="clear-btn"    id="clearBtn"   onclick="clearChecked()">🧹 Limpiar</button>
+    <button class="download-btn"                 onclick="downloadList()">⬇️ Exportar</button>
+    <button class="install-btn"  id="installBtn" onclick="triggerInstall()">📲 Instalar</button>
+  </div>
+</div>
+
+<!-- iOS install hint -->
+<div class="install-banner" id="iosBanner">
+  <button class="banner-close" onclick="closeBanner()">×</button>
+  <strong>Instalá la app en tu iPhone:</strong><br>
+  Tocá <strong>Compartir</strong> (el ícono de la caja con flecha) y luego <strong>"Agregar a pantalla de inicio"</strong>.
 </div>
 
 <!-- LIST -->
@@ -393,7 +430,7 @@
   <div class="modal">
     <div class="modal-title">Nueva categoría</div>
     <div class="icon-grid" id="iconGrid"></div>
-    <input class="modal-input" id="catNameInput" placeholder="Nombre de la categoría..." 
+    <input class="modal-input" id="catNameInput" placeholder="Nombre de la categoría..."
            onkeydown="if(event.key==='Enter') addCategory()">
     <div class="modal-btns">
       <button class="btn-cancel" onclick="closeModal('modalCat')">Cancelar</button>
@@ -426,6 +463,86 @@
 <div class="toast" id="toast"></div>
 
 <script>
+  // ─── PWA MANIFEST (inyectado dinámicamente, sin archivo extra) ───
+  const iconSVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+    <rect width="128" height="128" rx="24" fill="#0a1409"/>
+    <rect x="24" y="30" width="12" height="12" rx="3" fill="#2ecc71"/>
+    <rect x="44" y="33" width="60" height="6" rx="3" fill="#2ecc71"/>
+    <rect x="24" y="58" width="12" height="12" rx="3" fill="#2ecc71"/>
+    <rect x="44" y="61" width="60" height="6" rx="3" fill="#2ecc71"/>
+    <rect x="24" y="86" width="12" height="12" rx="3" fill="#2ecc71"/>
+    <rect x="44" y="89" width="60" height="6" rx="3" fill="#2ecc71"/>
+  </svg>`;
+  const iconBlob = new Blob([iconSVG], {type: "image/svg+xml"});
+  const iconUrl  = URL.createObjectURL(iconBlob);
+
+  const manifest = {
+    name: "Duxia SuperList",
+    short_name: "SuperList",
+    description: "Tu lista del super, siempre a mano",
+    start_url: "./",
+    display: "standalone",
+    background_color: "#0a1409",
+    theme_color: "#0a1409",
+    icons: [
+      { src: iconUrl, sizes: "128x128", type: "image/svg+xml", purpose: "any maskable" }
+    ]
+  };
+  const manifestBlob = new Blob([JSON.stringify(manifest)], {type:"application/json"});
+  const manifestUrl  = URL.createObjectURL(manifestBlob);
+  const manifestLink = document.createElement("link");
+  manifestLink.rel  = "manifest";
+  manifestLink.href = manifestUrl;
+  document.head.appendChild(manifestLink);
+
+  // ─── SERVICE WORKER (offline support) ────────────────────
+  if ("serviceWorker" in navigator) {
+    const swCode = `
+      const CACHE = "duxia-v1";
+      self.addEventListener("install", e => {
+        e.waitUntil(caches.open(CACHE).then(c => c.addAll(["./"])));
+      });
+      self.addEventListener("fetch", e => {
+        e.respondWith(caches.match(e.request).then(r => r || fetch(e.request)));
+      });
+    `;
+    const swBlob = new Blob([swCode], {type: "application/javascript"});
+    const swUrl  = URL.createObjectURL(swBlob);
+    navigator.serviceWorker.register(swUrl).catch(() => {});
+  }
+
+  // ─── INSTALL PROMPT (Android / Chrome) ───────────────────
+  let deferredPrompt = null;
+  window.addEventListener("beforeinstallprompt", e => {
+    e.preventDefault();
+    deferredPrompt = e;
+    document.getElementById("installBtn").classList.add("visible");
+  });
+
+  function triggerInstall() {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then(() => {
+        deferredPrompt = null;
+        document.getElementById("installBtn").classList.remove("visible");
+      });
+    }
+  }
+
+  // ─── iOS install banner ───────────────────────────────────
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const isInStandalone = window.navigator.standalone === true;
+  const bannerDismissed = localStorage.getItem("duxia_banner_dismissed");
+
+  if (isIOS && !isInStandalone && !bannerDismissed) {
+    document.getElementById("iosBanner").classList.add("visible");
+  }
+
+  function closeBanner() {
+    document.getElementById("iosBanner").classList.remove("visible");
+    localStorage.setItem("duxia_banner_dismissed", "1");
+  }
+
   // ─── ICONS ───────────────────────────────────────────────
   const ICONS = ["🛒","🥦","🥛","🍞","🧴","🧹","🐾","💊","🍷","🧊","🍗","🧀"];
 
@@ -439,9 +556,9 @@
     } catch(e) {}
     return {
       categories: [
-        { id: "cat1", name: "General",          icon: "🛒" },
-        { id: "cat2", name: "Frutas y Verduras", icon: "🥦" },
-        { id: "cat3", name: "Lácteos",           icon: "🥛" },
+        { id: "cat1", name: "General",           icon: "🛒" },
+        { id: "cat2", name: "Frutas y Verduras",  icon: "🥦" },
+        { id: "cat3", name: "Lácteos",            icon: "🥛" },
       ],
       items: []
     };
@@ -458,6 +575,34 @@
 
   function genId() {
     return Math.random().toString(36).slice(2) + Date.now().toString(36);
+  }
+
+  // ─── DOWNLOAD / EXPORT ───────────────────────────────────
+  function downloadList() {
+    let txt = "DUXIA SUPERLIST\n";
+    txt += "===============\n\n";
+    state.categories.forEach(cat => {
+      const items = state.items.filter(i => i.cat === cat.id);
+      txt += `${cat.icon} ${cat.name.toUpperCase()}\n`;
+      if (items.length === 0) {
+        txt += "  (vacío)\n";
+      } else {
+        items.forEach(i => {
+          txt += `  ${i.checked ? "[✓]" : "[ ]"} ${i.name}\n`;
+        });
+      }
+      txt += "\n";
+    });
+    txt += `\nExportado el ${new Date().toLocaleDateString("es-AR")}`;
+
+    const blob = new Blob([txt], { type: "text/plain;charset=utf-8" });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement("a");
+    a.href     = url;
+    a.download = `superlist-${new Date().toISOString().slice(0,10)}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast("Lista exportada ✓");
   }
 
   // ─── TOAST ───────────────────────────────────────────────
@@ -495,28 +640,24 @@
     emptyState.style.display = "none";
 
     container.innerHTML = state.categories.map(cat => {
-      const catItems = state.items.filter(i => i.cat === cat.id);
+      const catItems  = state.items.filter(i => i.cat === cat.id);
       const catPending = catItems.filter(i => !i.checked).length;
       const countLabel = catPending > 0 ? catPending : catItems.length > 0 ? "✓" : "";
 
       const itemsHTML = catItems.length === 0
         ? `<div class="empty-cat">Vacío</div>`
-        : catItems.map(item => {
-            const doneClass = item.checked ? "done" : "";
-            const checkMark = item.checked ? "✓" : "";
-            return `
-              <div class="item ${item.checked ? "checked" : ""}" id="item-${item.id}">
-                <button class="item-check" onclick="toggleItem('${item.id}')">
-                  <div class="check-box ${doneClass}">${checkMark}</div>
-                </button>
-                <span class="item-text" 
-                      ondblclick="startEdit('${item.id}', this)"
-                      title="Doble tap para editar">
-                  ${escHtml(item.name)}
-                </span>
-                <button class="item-del" onclick="deleteItem('${item.id}')">×</button>
-              </div>`;
-          }).join("");
+        : catItems.map(item => `
+            <div class="item ${item.checked ? "checked" : ""}" id="item-${item.id}">
+              <button class="item-check" onclick="toggleItem('${item.id}')">
+                <div class="check-box ${item.checked ? "done" : ""}">${item.checked ? "✓" : ""}</div>
+              </button>
+              <span class="item-text"
+                    ondblclick="startEdit('${item.id}', this)"
+                    title="Doble tap para editar">
+                ${escHtml(item.name)}
+              </span>
+              <button class="item-del" onclick="deleteItem('${item.id}')">×</button>
+            </div>`).join("");
 
       return `
         <div class="section">
@@ -540,8 +681,7 @@
     const name = document.getElementById("catNameInput").value.trim();
     if (!name) return;
     state.categories.push({ id: genId(), name, icon: selectedIcon });
-    save();
-    render();
+    save(); render();
     closeModal("modalCat");
     showToast(`Categoría "${name}" creada`);
   }
@@ -549,20 +689,18 @@
   function deleteCategory(id) {
     const cat = state.categories.find(c => c.id === id);
     state.categories = state.categories.filter(c => c.id !== id);
-    state.items = state.items.filter(i => i.cat !== id);
-    save();
-    render();
+    state.items      = state.items.filter(i => i.cat !== id);
+    save(); render();
     showToast(`"${cat?.name}" eliminada`);
   }
 
   // ─── ITEM ACTIONS ────────────────────────────────────────
   function addItem() {
     const name = document.getElementById("itemNameInput").value.trim();
-    const cat = selectedCatId || state.categories[0]?.id;
+    const cat  = selectedCatId || state.categories[0]?.id;
     if (!name || !cat) return;
     state.items.push({ id: genId(), name, cat, checked: false });
-    save();
-    render();
+    save(); render();
     document.getElementById("itemNameInput").value = "";
     document.getElementById("itemNameInput").focus();
     showToast(`"${name}" añadido`);
@@ -575,15 +713,13 @@
 
   function deleteItem(id) {
     state.items = state.items.filter(i => i.id !== id);
-    save();
-    render();
+    save(); render();
   }
 
   function clearChecked() {
     const count = state.items.filter(i => i.checked).length;
     state.items = state.items.filter(i => !i.checked);
-    save();
-    render();
+    save(); render();
     showToast(`${count} ítem${count !== 1 ? "s" : ""} eliminado${count !== 1 ? "s" : ""}`);
   }
 
@@ -597,11 +733,10 @@
     input.className = "item-edit-input";
     input.value = item.name;
     span.replaceWith(input);
-    input.focus();
-    input.select();
-    input.addEventListener("blur", () => commitEdit(id, input));
+    input.focus(); input.select();
+    input.addEventListener("blur",    () => commitEdit(id, input));
     input.addEventListener("keydown", e => {
-      if (e.key === "Enter") commitEdit(id, input);
+      if (e.key === "Enter")  commitEdit(id, input);
       if (e.key === "Escape") { editingItemId = null; render(); }
     });
   }
@@ -627,10 +762,7 @@
   }
 
   function openItemModal() {
-    if (state.categories.length === 0) {
-      showToast("Primero creá una categoría");
-      return;
-    }
+    if (state.categories.length === 0) { showToast("Primero creá una categoría"); return; }
     selectedCatId = state.categories[0].id;
     renderCatChips();
     document.getElementById("itemNameInput").value = "";
@@ -638,40 +770,25 @@
     setTimeout(() => document.getElementById("itemNameInput").focus(), 300);
   }
 
-  function closeModal(id) {
-    document.getElementById(id).classList.remove("open");
-  }
-
-  function closeCatModal(e) {
-    if (e.target.id === "modalCat") closeModal("modalCat");
-  }
-  function closeItemModal(e) {
-    if (e.target.id === "modalItem") closeModal("modalItem");
-  }
+  function closeModal(id) { document.getElementById(id).classList.remove("open"); }
+  function closeCatModal(e)  { if (e.target.id === "modalCat")  closeModal("modalCat");  }
+  function closeItemModal(e) { if (e.target.id === "modalItem") closeModal("modalItem"); }
 
   function renderIconGrid() {
-    document.getElementById("iconGrid").innerHTML = ICONS.map(icon => `
-      <button class="icon-btn ${icon === selectedIcon ? "active" : ""}" onclick="selectIcon('${icon}')">${icon}</button>
-    `).join("");
+    document.getElementById("iconGrid").innerHTML = ICONS.map(icon =>
+      `<button class="icon-btn ${icon === selectedIcon ? "active" : ""}" onclick="selectIcon('${icon}')">${icon}</button>`
+    ).join("");
   }
-
-  function selectIcon(icon) {
-    selectedIcon = icon;
-    renderIconGrid();
-  }
+  function selectIcon(icon) { selectedIcon = icon; renderIconGrid(); }
 
   function renderCatChips() {
-    document.getElementById("catChips").innerHTML = state.categories.map(cat => `
-      <button class="cat-chip ${cat.id === selectedCatId ? "active" : ""}" onclick="selectCat('${cat.id}')">
+    document.getElementById("catChips").innerHTML = state.categories.map(cat =>
+      `<button class="cat-chip ${cat.id === selectedCatId ? "active" : ""}" onclick="selectCat('${cat.id}')">
         ${cat.icon} ${escHtml(cat.name)}
-      </button>
-    `).join("");
+      </button>`
+    ).join("");
   }
-
-  function selectCat(id) {
-    selectedCatId = id;
-    renderCatChips();
-  }
+  function selectCat(id) { selectedCatId = id; renderCatChips(); }
 
   // ─── INIT ────────────────────────────────────────────────
   render();
